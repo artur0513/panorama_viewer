@@ -1,0 +1,65 @@
+uniform sampler2D cubemap0;
+uniform sampler2D cubemap1;
+uniform sampler2D cubemap2;
+uniform sampler2D cubemap3;
+uniform sampler2D cubemap4;
+uniform sampler2D cubemap5;
+
+const float PI = 3.14159265358979;
+
+bool check(vec2 coord){
+	return (coord.x < 0.5 && coord.x > -0.5 && coord.y < 0.5 && coord.y > -0.5);
+}
+
+void main() {
+	// polar coordinates
+	float theta = (gl_TexCoord[0].x*2.0 - 1.0)*PI;
+	float phi = (gl_TexCoord[0].y - 0.5) * PI; // or asin(gl_TexCoord[0].y*2.0 - 1.0) or (gl_TexCoord[0].y - 0.5) * PI check what is better
+	
+	vec3 dir = vec3(cos(phi)*cos(theta),cos(phi)*sin(theta),sin(phi));
+	vec3 check_coord;
+	
+	//bottom check (what if /0.0?)
+	check_coord = dir * (-0.5/dir.z);
+	if (check(check_coord.xy) && dir.z < 0.0){
+		gl_FragColor = texture2D(cubemap3, check_coord.xy + vec2(0.5, 0.5));
+		return;
+	}
+	
+	//top check
+	check_coord = dir * (0.5/dir.z);
+	if (check(check_coord.xy) && dir.z > 0.0){
+		gl_FragColor = texture2D(cubemap2, check_coord.xy*vec2(1.0, -1.0) + vec2(0.5, 0.5));
+		return;
+	}
+	
+	//front check
+	check_coord = dir * (0.5/dir.x);
+	if (check(check_coord.yz) && dir.x > 0.0){
+		gl_FragColor = texture2D(cubemap0, check_coord.yz*vec2(1.0, -1.0) + vec2(0.5, 0.5));
+		return;
+	}
+	
+	//back check
+	check_coord = dir * (-0.5/dir.x);
+	if (check(check_coord.yz) && dir.x < 0.0){
+		gl_FragColor = texture2D(cubemap1, check_coord.yz*vec2(-1.0, -1.0) + vec2(0.5, 0.5));
+		return;
+	}
+	
+	//right check
+	check_coord = dir * (0.5/dir.y);
+	if (check(check_coord.xz) && dir.y > 0.0){
+		gl_FragColor = texture2D(cubemap5, check_coord.xz*vec2(-1.0, -1.0) + vec2(0.5, 0.5));
+		return;
+	}
+	
+	//left check
+	check_coord = dir * (-0.5/dir.y);
+	if (check(check_coord.xz) && dir.y < 0.0){
+		gl_FragColor = texture2D(cubemap4, check_coord.xz*vec2(1.0, -1.0) + vec2(0.5, 0.5));
+		return;
+	}
+	
+	gl_FragColor = vec4(0.5); // just in case
+}

@@ -1,0 +1,30 @@
+precision highp float;
+uniform sampler2D panorama;
+
+uniform vec2 sphere_coords;
+uniform vec2 fov;
+uniform vec2 screen_res;
+
+const float PI = 3.14159265358979;
+
+void main() {
+	vec3 world_coords = vec3(1.0, (gl_FragCoord.x / screen_res.x - 0.5) * 2.0 * tan(fov.x * 0.5),  ( - gl_FragCoord.y / screen_res.y + 0.5) * 2.0 * tan(fov.y * 0.5));
+	vec3 p_sphere_coords = world_coords/length(world_coords);
+	
+	mat3 rot_y;
+	rot_y[0] = vec3(cos(sphere_coords.y), 0, -sin(sphere_coords.y));
+	rot_y[1] = vec3(0, 1, 0);
+	rot_y[2] = vec3(sin(sphere_coords.y), 0, cos(sphere_coords.y));
+	
+	mat3 rot_z;
+	rot_z[0] = vec3(cos(sphere_coords.x), sin(sphere_coords.x), 0);
+	rot_z[1] = vec3(-sin(sphere_coords.x), cos(sphere_coords.x), 0);
+	rot_z[2] = vec3(0, 0, 1);
+	
+	p_sphere_coords = (rot_z * rot_y) * p_sphere_coords;
+	
+	vec2 tex_coord = vec2(atan(p_sphere_coords.y, p_sphere_coords.x), asin(p_sphere_coords.z)); // (p_sphere_coords.z + 1.0) * 0.5 //asin(p_sphere_coords.z)
+	tex_coord.x = mod(tex_coord.x / (2.0*PI) + 0.5, 1.0);
+	tex_coord.y = mod(tex_coord.y / PI + 0.5, 1.0);
+	gl_FragColor = texture2D(panorama, tex_coord);
+}
