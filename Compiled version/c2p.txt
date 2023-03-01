@@ -1,3 +1,4 @@
+#version 130
 precision highp float;
 
 uniform sampler2D cubemap0;
