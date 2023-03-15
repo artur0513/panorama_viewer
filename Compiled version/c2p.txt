@@ -1,6 +1,3 @@
-#version 130
-precision highp float;
-
 uniform sampler2D cubemap0;
 uniform sampler2D cubemap1;
 uniform sampler2D cubemap2;
