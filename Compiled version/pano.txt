@@ -1,4 +1,3 @@
-precision highp float;
 uniform sampler2D panorama;
 
 uniform vec2 sphere_coords;
