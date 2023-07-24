@@ -1,1 +1,0 @@
-error loading shader C:\Users\artur\panorama_viewer\Compiled version\pano.txt 
